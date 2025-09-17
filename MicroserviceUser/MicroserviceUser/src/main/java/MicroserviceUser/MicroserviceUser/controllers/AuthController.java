@@ -5,6 +5,7 @@ import MicroserviceUser.MicroserviceUser.Dto.JwtAuthDto;
 import MicroserviceUser.MicroserviceUser.Dto.UserDto;
 import MicroserviceUser.MicroserviceUser.Dto.RefreshTokenDto;
 import MicroserviceUser.MicroserviceUser.Dto.UserCredentialsDto;
+import MicroserviceUser.MicroserviceUser.Security.Jwt.JwtService;
 import MicroserviceUser.MicroserviceUser.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,13 +18,13 @@ import javax.naming.AuthenticationException;
 
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
 public class AuthController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/sing-in")
+    @PostMapping("/sign-in")
     public ResponseEntity<JwtAuthDto> singIn(@RequestBody UserCredentialsDto userCredentialsDto) {
         try {
             JwtAuthDto jwtAuthenticationDto = userService.singIn(userCredentialsDto);
@@ -41,7 +42,16 @@ public class AuthController {
     }
 
     @PostMapping("/registration")
-    public String createUser(@RequestBody UserDto userDto) {
-        return userService.addUser(userDto);
+    public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
+        try {
+            String result = userService.addUser(userDto);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Internal server error: " + e.getMessage());
+        }
     }
 }

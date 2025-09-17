@@ -41,8 +41,6 @@ public class UserService implements UserDetailsService  {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-        System.out.println("Loaded user: " + user.getUsername() + " with role: " + user.getRole());
         return user;
     }
 
@@ -52,6 +50,9 @@ public class UserService implements UserDetailsService  {
         }
         if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new IllegalArgumentException("This email is already in use");
         }
 
         User user = new User();

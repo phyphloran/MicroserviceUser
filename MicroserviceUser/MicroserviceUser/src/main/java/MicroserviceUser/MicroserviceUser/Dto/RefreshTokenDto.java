@@ -1,5 +1,6 @@
 package MicroserviceUser.MicroserviceUser.Dto;
 
+
 public class RefreshTokenDto {
 
     private String refreshToken;

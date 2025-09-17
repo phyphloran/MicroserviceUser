@@ -31,8 +31,21 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromRequest(request);
-        if (token != null && jwtService.validateJwtToken(token)) {
-            setAuthenticationFromToken(token);
+        if (token != null) {
+            boolean isValid = jwtService.validateJwtDate(token);
+
+            if (isValid && !request.getRequestURI().startsWith("/api/test")) { //без запроса к бд, проверка на валидность срока действия токена(test)
+                String email = jwtService.getEmailFromToken(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
         filterChain.doFilter(request, response);
     }
