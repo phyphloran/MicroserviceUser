@@ -27,6 +27,4 @@ public class TempRestController {
             return ResponseEntity.status(403).body("Invalid or expired token");
         }
     }
-
-
 }
